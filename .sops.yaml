@@ -1,0 +1,10 @@
+creation_rules:
+  - path_regex: '(^|/)(talosconfig|controlplane\.ya?ml|worker\.ya?ml|patch\.ya?ml)$'
+    kms:
+      - arn:aws:kms:ap-south-1:867344433810:key/835f8130-e33d-4cf8-af3c-4fb5a0bb9d4a+arn:aws:iam::867344433810:role/SopsKmsUser
+    encrypted_regex: "^(.*)$"
+
+  - path_regex: '(^|/)(secrets/.*\.ya?ml|.*-secret\.ya?ml|.*\.secret\.ya?ml|.*secrets?\.ya?ml)$'
+    kms:
+      - arn:aws:kms:ap-south-1:867344433810:key/835f8130-e33d-4cf8-af3c-4fb5a0bb9d4a+arn:aws:iam::867344433810:role/SopsKmsUser
+    encrypted_regex: "^(data|stringData)$"
