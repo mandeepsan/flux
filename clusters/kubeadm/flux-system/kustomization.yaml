@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
 - gotk-components.yaml
 - gotk-sync.yaml
+- sops-aws-kms-secret.yaml
 patches:
 - target:
     group: kustomize.toolkit.fluxcd.io
