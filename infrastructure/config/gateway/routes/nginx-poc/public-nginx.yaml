@@ -1,0 +1,16 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: public-nginx
+  namespace: networking
+spec:
+  parentRefs:
+  - name: otroid-gateway
+    sectionName: https-wildcard-otroid-net
+  hostnames:
+  - public.otroid.net
+  rules:
+  - backendRefs:
+    - name: public-nginx
+      namespace: apps
+      port: 80

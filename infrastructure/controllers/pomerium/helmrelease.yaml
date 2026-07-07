@@ -27,16 +27,13 @@ spec:
     config:
       rootDomain: otroid.net
       insecure: true
-      # Add protected app routes here and point their Gateway HTTPRoute to
-      # networking/pomerium-proxy. Public routes should bypass Pomerium.
-      #
-      # routes:
-      # - from: https://app.otroid.net
-      #   to: http://app.namespace.svc.cluster.local
-      #   policy:
-      #   - allow:
-      #       or:
-      #       - claim/groups: devops
+      routes:
+      - from: https://secured.otroid.net
+        to: http://secured-nginx.apps.svc.cluster.local
+        policy:
+        - allow:
+            or:
+            - claim/groups: devops
     authenticate:
       name: auth
       idp:
