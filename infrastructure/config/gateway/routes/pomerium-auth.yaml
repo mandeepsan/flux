@@ -11,5 +11,5 @@ spec:
   - auth.otroid.net
   rules:
   - backendRefs:
-    - name: pomerium-proxy
+    - name: pomerium-authenticate
       port: 80
