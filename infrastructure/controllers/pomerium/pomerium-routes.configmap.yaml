@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pomerium-routes
+  namespace: networking
+data:
+  values.yaml: |
+    config:
+      routes:
+      - from: https://secured.otroid.net
+        to: http://secured-nginx.apps.svc.cluster.local
+        policy:
+        - allow:
+            or:
+            - claim/groups: devops

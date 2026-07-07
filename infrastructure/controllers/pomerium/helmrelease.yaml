@@ -27,13 +27,6 @@ spec:
     config:
       rootDomain: otroid.net
       insecure: true
-      routes:
-      - from: https://secured.otroid.net
-        to: http://secured-nginx.apps.svc.cluster.local
-        policy:
-        - allow:
-            or:
-            - claim/groups: devops
     authenticate:
       name: auth
       idp:
@@ -47,4 +40,7 @@ spec:
   valuesFrom:
   - kind: Secret
     name: pomerium-values
+    valuesKey: values.yaml
+  - kind: ConfigMap
+    name: pomerium-routes
     valuesKey: values.yaml
