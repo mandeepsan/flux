@@ -17,6 +17,10 @@ spec:
     kind: HelmRelease
     name: cert-manager
     namespace: cert-manager
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-aws-kms
   sourceRef:
     kind: GitRepository
     name: flux-system
