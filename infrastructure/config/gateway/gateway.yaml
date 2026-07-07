@@ -1,0 +1,27 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: otroid-gateway
+  namespace: networking
+spec:
+  gatewayClassName: cilium
+  listeners:
+  - name: http-wildcard-otroid-net
+    hostname: "*.otroid.net"
+    port: 80
+    protocol: HTTP
+    allowedRoutes:
+      namespaces:
+        from: Same
+  - name: https-wildcard-otroid-net
+    hostname: "*.otroid.net"
+    port: 443
+    protocol: HTTPS
+    tls:
+      mode: Terminate
+      certificateRefs:
+      - kind: Secret
+        name: wildcard-otroid-net-tls
+    allowedRoutes:
+      namespaces:
+        from: Same

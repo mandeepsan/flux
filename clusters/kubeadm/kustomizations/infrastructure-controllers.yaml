@@ -17,6 +17,10 @@ spec:
     kind: HelmRelease
     name: cert-manager
     namespace: cert-manager
+  - apiVersion: helm.toolkit.fluxcd.io/v2
+    kind: HelmRelease
+    name: pomerium
+    namespace: networking
   decryption:
     provider: sops
     secretRef:
