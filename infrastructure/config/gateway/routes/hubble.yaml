@@ -1,16 +1,15 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: public-nginx
+  name: hubble
   namespace: networking
 spec:
   parentRefs:
   - name: otroid-gateway
     sectionName: https-wildcard-otroid-net
   hostnames:
-  - public.otroid.net
+  - hubble.otroid.net
   rules:
   - backendRefs:
-    - name: public-nginx
-      namespace: apps
+    - name: pomerium-proxy
       port: 80

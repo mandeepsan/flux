@@ -7,8 +7,8 @@ data:
   values.yaml: |
     config:
       routes:
-      - from: https://secured.otroid.net
-        to: http://secured-nginx.apps.svc.cluster.local
+      - from: https://hubble.otroid.net
+        to: http://hubble-ui.kube-system.svc.cluster.local
         policy:
         - allow:
             or:
