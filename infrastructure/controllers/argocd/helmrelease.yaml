@@ -1,0 +1,58 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: argocd
+  namespace: argocd
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: argo-cd
+      version: 10.1.2
+      sourceRef:
+        kind: HelmRepository
+        name: argo
+        namespace: flux-system
+      interval: 1h
+  install:
+    remediation:
+      retries: -1
+  upgrade:
+    remediation:
+      retries: -1
+      remediateLastFailure: true
+  driftDetection:
+    mode: enabled
+  values:
+    global:
+      domain: argo.otroid.net
+    configs:
+      cm:
+        url: https://argo.otroid.net
+        admin.enabled: false
+        oidc.config: |
+          name: Pocket ID
+          issuer: https://id.otroid.net
+          clientID: d1b65828-d9f2-411c-91ec-d2c707f0c6e8
+          clientSecret: $oidc.pocketid.clientSecret
+          requestedScopes:
+          - openid
+          - profile
+          - email
+          - groups
+          requestedIDTokenClaims:
+            groups:
+              essential: true
+      params:
+        server.insecure: "true"
+      rbac:
+        policy.default: ""
+        scopes: "[groups]"
+        policy.csv: |
+          g, devops, role:admin
+    dex:
+      enabled: false
+  valuesFrom:
+  - kind: Secret
+    name: argocd-values
+    valuesKey: values.yaml
