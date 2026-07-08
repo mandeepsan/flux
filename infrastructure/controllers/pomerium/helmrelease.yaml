@@ -33,6 +33,21 @@ spec:
         provider: oidc
         url: https://id.otroid.net
         scopes: openid profile email groups
+      deployment:
+        podAnnotations:
+          secret.reloader.stakater.com/reload: pomerium,pomerium-shared,pomerium-signing-key
+    authorize:
+      deployment:
+        podAnnotations:
+          secret.reloader.stakater.com/reload: pomerium,pomerium-shared,pomerium-signing-key
+    databroker:
+      deployment:
+        podAnnotations:
+          secret.reloader.stakater.com/reload: pomerium,pomerium-shared
+    proxy:
+      deployment:
+        podAnnotations:
+          secret.reloader.stakater.com/reload: pomerium,pomerium-shared,pomerium-signing-key
     ingress:
       enabled: false
     redis:
