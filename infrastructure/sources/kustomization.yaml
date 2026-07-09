@@ -7,3 +7,4 @@ resources:
 - pomerium
 - prometheus-community
 - reloader
+- seaweedfs

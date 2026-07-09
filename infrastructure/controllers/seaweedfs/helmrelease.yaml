@@ -1,0 +1,120 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: seaweedfs
+  namespace: storage
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: seaweedfs
+      version: 4.37.0
+      sourceRef:
+        kind: HelmRepository
+        name: seaweedfs
+        namespace: flux-system
+      interval: 1h
+  install:
+    remediation:
+      retries: -1
+  upgrade:
+    remediation:
+      retries: -1
+      remediateLastFailure: true
+  driftDetection:
+    mode: enabled
+  values:
+    global:
+      seaweedfs:
+        monitoring:
+          enabled: true
+          additionalLabels:
+            release: prometheus-stack
+    master:
+      replicas: 1
+      volumeSizeLimitMB: 1024
+      defaultReplication: "000"
+      data:
+        type: persistentVolumeClaim
+        size: 2Gi
+        storageClass: local-path
+      logs:
+        type: emptyDir
+      resources:
+        requests:
+          cpu: 100m
+          memory: 128Mi
+        limits:
+          memory: 512Mi
+    volume:
+      replicas: 1
+      dataDirs:
+      - name: data1
+        type: persistentVolumeClaim
+        size: 100Gi
+        storageClass: local-path
+        maxVolumes: 100
+      logs:
+        type: emptyDir
+      resources:
+        requests:
+          cpu: 500m
+          memory: 1Gi
+        limits:
+          memory: 4Gi
+    filer:
+      replicas: 1
+      defaultReplicaPlacement: "000"
+      data:
+        type: persistentVolumeClaim
+        size: 10Gi
+        storageClass: local-path
+      logs:
+        type: emptyDir
+      resources:
+        requests:
+          cpu: 250m
+          memory: 512Mi
+        limits:
+          memory: 2Gi
+    s3:
+      enabled: true
+      replicas: 1
+      enableAuth: true
+      existingConfigSecret: seaweedfs-s3-credentials
+      extraArgs:
+      - -iam.config=/etc/seaweedfs/iam/iam.json
+      extraVolumes: |
+        - name: seaweedfs-s3-iam
+          secret:
+            secretName: seaweedfs-s3-iam
+      extraVolumeMounts: |
+        - name: seaweedfs-s3-iam
+          mountPath: /etc/seaweedfs/iam
+          readOnly: true
+      logs:
+        type: emptyDir
+      resources:
+        requests:
+          cpu: 250m
+          memory: 512Mi
+        limits:
+          memory: 2Gi
+      service:
+        type: ClusterIP
+    admin:
+      enabled: true
+      data:
+        type: persistentVolumeClaim
+        size: 5Gi
+        storageClass: local-path
+      logs:
+        type: emptyDir
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          memory: 1Gi
+    worker:
+      enabled: false

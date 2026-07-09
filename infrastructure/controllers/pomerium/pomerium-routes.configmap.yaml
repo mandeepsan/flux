@@ -19,3 +19,9 @@ data:
         - allow:
             or:
             - claim/groups: devops
+      - from: https://seaweedfs.otroid.net
+        to: http://seaweedfs-admin.storage.svc.cluster.local:23646
+        policy:
+        - allow:
+            or:
+            - claim/groups: devops
