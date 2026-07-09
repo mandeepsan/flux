@@ -28,17 +28,40 @@ spec:
   values:
     fullnameOverride: prometheus-stack
     grafana:
-      additionalDataSources:
-      - name: Loki
-        uid: loki
-        type: loki
-        access: proxy
-        url: http://loki-gateway.monitoring.svc.cluster.local
-        isDefault: false
-        editable: false
-        jsonData:
-          timeout: 60
-          maxLines: 1000
+      sidecar:
+        datasources:
+          enabled: false
+      datasources:
+        datasource.yaml:
+          apiVersion: 1
+          datasources:
+          - name: Prometheus
+            uid: prometheus
+            type: prometheus
+            access: proxy
+            url: http://prometheus-stack-prometheus.monitoring:9090/
+            isDefault: true
+            jsonData:
+              httpMethod: POST
+              timeInterval: 30s
+          - name: Alertmanager
+            uid: alertmanager
+            type: alertmanager
+            access: proxy
+            url: http://prometheus-stack-alertmanager.monitoring:9093/
+            jsonData:
+              handleGrafanaManagedAlerts: false
+              implementation: prometheus
+          - name: Loki
+            uid: loki
+            type: loki
+            access: proxy
+            url: http://loki-gateway.monitoring.svc.cluster.local
+            isDefault: false
+            editable: false
+            jsonData:
+              timeout: 60
+              maxLines: 1000
       envValueFrom:
         GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET:
           secretKeyRef:
