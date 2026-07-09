@@ -13,3 +13,9 @@ data:
         - allow:
             or:
             - claim/groups: devops
+      - from: https://metrics.otroid.net
+        to: http://prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
+        policy:
+        - allow:
+            or:
+            - claim/groups: devops

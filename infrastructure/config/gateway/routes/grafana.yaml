@@ -1,0 +1,16 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: grafana
+  namespace: networking
+spec:
+  parentRefs:
+  - name: otroid-gateway
+    sectionName: https-wildcard-otroid-net
+  hostnames:
+  - grafana.otroid.net
+  rules:
+  - backendRefs:
+    - name: prometheus-stack-grafana
+      namespace: monitoring
+      port: 80

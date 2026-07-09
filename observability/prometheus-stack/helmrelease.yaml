@@ -1,0 +1,85 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: prometheus-stack
+  namespace: monitoring
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: kube-prometheus-stack
+      version: 87.12.1
+      sourceRef:
+        kind: HelmRepository
+        name: prometheus-community
+        namespace: flux-system
+      interval: 1h
+  install:
+    crds: Create
+    remediation:
+      retries: -1
+  upgrade:
+    crds: CreateReplace
+    remediation:
+      retries: -1
+      remediateLastFailure: true
+  driftDetection:
+    mode: enabled
+  values:
+    fullnameOverride: prometheus-stack
+    grafana:
+      envValueFrom:
+        GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET:
+          secretKeyRef:
+            name: grafana-oidc
+            key: GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET
+      grafana.ini:
+        server:
+          domain: grafana.otroid.net
+          root_url: https://grafana.otroid.net
+        auth:
+          disable_login_form: true
+          oauth_auto_login: false
+        auth.generic_oauth:
+          enabled: true
+          name: Pocket ID
+          allow_sign_up: true
+          client_id: a5273eb4-7599-43e2-8ee1-341823e0c72d
+          client_secret: $__env{GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET}
+          scopes: openid profile email groups
+          auth_url: https://id.otroid.net/authorize
+          token_url: https://id.otroid.net/api/oidc/token
+          api_url: https://id.otroid.net/api/oidc/userinfo
+          groups_attribute_path: groups
+          allowed_groups: devops
+          role_attribute_path: contains(groups[*], 'devops') && 'Admin'
+          role_attribute_strict: true
+          allow_assign_grafana_admin: true
+      persistence:
+        enabled: true
+        storageClassName: local-path
+        size: 5Gi
+    prometheus:
+      prometheusSpec:
+        externalUrl: https://metrics.otroid.net
+        retention: 7d
+        storageSpec:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: local-path
+              accessModes:
+              - ReadWriteOnce
+              resources:
+                requests:
+                  storage: 20Gi
+    alertmanager:
+      alertmanagerSpec:
+        storage:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: local-path
+              accessModes:
+              - ReadWriteOnce
+              resources:
+                requests:
+                  storage: 2Gi
