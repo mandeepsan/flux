@@ -62,7 +62,8 @@ spec:
     prometheus:
       prometheusSpec:
         externalUrl: https://metrics.otroid.net
-        retention: 7d
+        retention: 30d
+        retentionSize: 45GB
         storageSpec:
           volumeClaimTemplate:
             spec:
@@ -71,7 +72,7 @@ spec:
               - ReadWriteOnce
               resources:
                 requests:
-                  storage: 20Gi
+                  storage: 50Gi
     alertmanager:
       alertmanagerSpec:
         storage:
