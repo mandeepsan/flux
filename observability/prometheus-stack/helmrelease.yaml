@@ -28,6 +28,17 @@ spec:
   values:
     fullnameOverride: prometheus-stack
     grafana:
+      additionalDataSources:
+      - name: Loki
+        uid: loki
+        type: loki
+        access: proxy
+        url: http://loki-gateway.monitoring.svc.cluster.local
+        isDefault: false
+        editable: false
+        jsonData:
+          timeout: 60
+          maxLines: 1000
       envValueFrom:
         GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET:
           secretKeyRef:
