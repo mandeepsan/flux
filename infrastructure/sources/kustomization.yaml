@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
 - argocd
 - cert-manager
+- grafana
 - pomerium
 - prometheus-community
 - reloader
