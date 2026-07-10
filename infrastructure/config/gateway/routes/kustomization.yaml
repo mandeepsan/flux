@@ -7,5 +7,7 @@ resources:
 - metrics.yaml
 - otroid-https-redirect.yaml
 - pomerium-auth.yaml
+- s3-buckets.yaml
+- s3-buckets-https-redirect.yaml
 - s3.yaml
 - seaweedfs.yaml

@@ -3,3 +3,4 @@ kind: Kustomization
 resources:
 - wildcard-otroid-net.yaml
 - wildcard-proxcloud-me.yaml
+- wildcard-s3-otroid-net.yaml

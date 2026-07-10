@@ -13,6 +13,13 @@ spec:
     allowedRoutes:
       namespaces:
         from: Same
+  - name: http-wildcard-s3-otroid-net
+    hostname: "*.s3.otroid.net"
+    port: 80
+    protocol: HTTP
+    allowedRoutes:
+      namespaces:
+        from: Same
   - name: https-wildcard-otroid-net
     hostname: "*.otroid.net"
     port: 443
@@ -22,6 +29,18 @@ spec:
       certificateRefs:
       - kind: Secret
         name: wildcard-otroid-net-tls
+    allowedRoutes:
+      namespaces:
+        from: Same
+  - name: https-wildcard-s3-otroid-net
+    hostname: "*.s3.otroid.net"
+    port: 443
+    protocol: HTTPS
+    tls:
+      mode: Terminate
+      certificateRefs:
+      - kind: Secret
+        name: wildcard-s3-otroid-net-tls
     allowedRoutes:
       namespaces:
         from: Same

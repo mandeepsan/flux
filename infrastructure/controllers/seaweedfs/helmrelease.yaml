@@ -80,6 +80,7 @@ spec:
     s3:
       enabled: true
       replicas: 1
+      domainName: s3.otroid.net
       enableAuth: true
       existingConfigSecret: seaweedfs-s3-credentials
       extraArgs:
