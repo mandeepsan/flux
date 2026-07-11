@@ -3,6 +3,8 @@ kind: Kustomization
 resources:
 - argocd
 - cert-manager
+- cilium
+- local-path-provisioner
 - networking
 - pomerium
 - reloader
