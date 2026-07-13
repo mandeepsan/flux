@@ -23,6 +23,18 @@ spec:
       remediateLastFailure: true
   driftDetection:
     mode: enabled
+  postRenderers:
+  - kustomize:
+      patches:
+      - target:
+          group: monitoring.coreos.com
+          version: v1
+          kind: ServiceMonitor
+          name: harbor
+        patch: |
+          - op: replace
+            path: /metadata/labels/release
+            value: prometheus-stack
   values:
     externalURL: https://harbor.otroid.net
     expose:
@@ -64,8 +76,6 @@ spec:
       enabled: true
       serviceMonitor:
         enabled: true
-        additionalLabels:
-          release: prometheus-stack
     existingSecretAdminPassword: harbor-values
     existingSecretAdminPasswordKey: HARBOR_ADMIN_PASSWORD
     existingSecretSecretKey: harbor-values
