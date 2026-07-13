@@ -34,7 +34,11 @@ spec:
             data="${3:-}"
             expected="${4:-200}"
 
-            if [ -n "${data}" ]; then
+            if [ "${method}" = "HEAD" ]; then
+              status=$(curl -sSI -o /tmp/harbor-bootstrap-response -w "%{http_code}" \
+                -u "admin:${HARBOR_ADMIN_PASSWORD}" \
+                "${harbor_url}${path}")
+            elif [ -n "${data}" ]; then
               status=$(curl -sS -o /tmp/harbor-bootstrap-response -w "%{http_code}" \
                 -u "admin:${HARBOR_ADMIN_PASSWORD}" \
                 -H "Content-Type: application/json" \
