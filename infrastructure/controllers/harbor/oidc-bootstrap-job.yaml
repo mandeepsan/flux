@@ -1,0 +1,73 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: harbor-oidc-bootstrap
+  namespace: harbor
+spec:
+  backoffLimit: 6
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: bootstrap
+        image: curlimages/curl:8.17.0
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: HARBOR_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: harbor-values
+              key: HARBOR_ADMIN_PASSWORD
+        - name: OIDC_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: harbor-values
+              key: OIDC_CLIENT_SECRET
+        command:
+        - /bin/sh
+        - -ec
+        - |
+          harbor_url="http://harbor"
+
+          until curl -fsS "${harbor_url}/api/v2.0/health" >/dev/null; do
+            sleep 5
+          done
+
+          payload=$(cat <<EOF
+          {
+            "auth_mode": "oidc_auth",
+            "primary_auth_mode": true,
+            "oidc_name": "Pocket ID",
+            "oidc_endpoint": "https://id.otroid.net",
+            "oidc_client_id": "434cda81-0c8f-4ff9-b3dd-795e5759cce7",
+            "oidc_client_secret": "${OIDC_CLIENT_SECRET}",
+            "oidc_groups_claim": "groups",
+            "oidc_admin_group": "devops",
+            "oidc_group_filter": "devops",
+            "oidc_scope": "openid,profile,email,groups",
+            "oidc_user_claim": "preferred_username",
+            "oidc_verify_cert": true,
+            "oidc_auto_onboard": true,
+            "oidc_logout": true
+          }
+          EOF
+          )
+
+          for attempt in $(seq 1 30); do
+            status=$(curl -sS -o /tmp/harbor-oidc-response -w "%{http_code}" \
+              -u "admin:${HARBOR_ADMIN_PASSWORD}" \
+              -H "Content-Type: application/json" \
+              -X PUT \
+              -d "${payload}" \
+              "${harbor_url}/api/v2.0/configurations")
+
+            if [ "${status}" = "200" ]; then
+              exit 0
+            fi
+
+            cat /tmp/harbor-oidc-response
+            echo "Harbor OIDC configuration attempt ${attempt} failed with HTTP ${status}"
+            sleep 10
+          done
+
+          exit 1

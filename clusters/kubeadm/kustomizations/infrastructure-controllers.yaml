@@ -31,6 +31,10 @@ spec:
     namespace: local-path-storage
   - apiVersion: helm.toolkit.fluxcd.io/v2
     kind: HelmRelease
+    name: harbor
+    namespace: harbor
+  - apiVersion: helm.toolkit.fluxcd.io/v2
+    kind: HelmRelease
     name: pomerium
     namespace: networking
   - apiVersion: helm.toolkit.fluxcd.io/v2

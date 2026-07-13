@@ -5,6 +5,7 @@ resources:
 - cert-manager
 - cilium
 - grafana
+- harbor
 - pomerium
 - prometheus-community
 - reloader

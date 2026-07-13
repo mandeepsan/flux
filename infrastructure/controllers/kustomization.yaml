@@ -4,6 +4,7 @@ resources:
 - argocd
 - cert-manager
 - cilium
+- harbor
 - local-path-provisioner
 - networking
 - pomerium

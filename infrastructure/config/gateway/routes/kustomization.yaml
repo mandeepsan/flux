@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
 - argocd.yaml
 - grafana.yaml
+- harbor.yaml
 - hubble.yaml
 - metrics.yaml
 - otroid-https-redirect.yaml

@@ -1,0 +1,89 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: harbor
+  namespace: harbor
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: harbor
+      version: 1.19.1
+      sourceRef:
+        kind: HelmRepository
+        name: harbor
+        namespace: flux-system
+      interval: 1h
+  install:
+    remediation:
+      retries: -1
+  upgrade:
+    remediation:
+      retries: -1
+      remediateLastFailure: true
+  driftDetection:
+    mode: enabled
+  values:
+    externalURL: https://harbor.otroid.net
+    expose:
+      type: clusterIP
+      tls:
+        enabled: false
+      clusterIP:
+        name: harbor
+        ports:
+          httpPort: 80
+    persistence:
+      enabled: true
+      resourcePolicy: keep
+      persistentVolumeClaim:
+        registry:
+          storageClass: local-path
+          accessMode: ReadWriteOnce
+          size: 80Gi
+        jobservice:
+          jobLog:
+            storageClass: local-path
+            accessMode: ReadWriteOnce
+            size: 5Gi
+        database:
+          storageClass: local-path
+          accessMode: ReadWriteOnce
+          size: 5Gi
+        redis:
+          storageClass: local-path
+          accessMode: ReadWriteOnce
+          size: 2Gi
+        trivy:
+          storageClass: local-path
+          accessMode: ReadWriteOnce
+          size: 10Gi
+    updateStrategy:
+      type: Recreate
+    metrics:
+      enabled: true
+      serviceMonitor:
+        enabled: true
+        additionalLabels:
+          release: prometheus-stack
+    existingSecretAdminPassword: harbor-values
+    existingSecretAdminPasswordKey: HARBOR_ADMIN_PASSWORD
+    existingSecretSecretKey: harbor-values
+    core:
+      existingSecret: harbor-values
+      secretName: harbor-values
+      existingXsrfSecret: harbor-values
+    jobservice:
+      existingSecret: harbor-values
+    registry:
+      existingSecret: harbor-values
+      credentials:
+        username: harbor_registry_user
+        existingSecret: harbor-values
+    redis:
+      internal:
+        existingSecret: harbor-values
+  valuesFrom:
+  - kind: Secret
+    name: harbor-values
+    valuesKey: values.yaml
