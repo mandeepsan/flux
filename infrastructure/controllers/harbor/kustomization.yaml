@@ -6,3 +6,4 @@ resources:
 - referencegrant.yaml
 - helmrelease.yaml
 - oidc-bootstrap-job.yaml
+- project-bootstrap-job.yaml

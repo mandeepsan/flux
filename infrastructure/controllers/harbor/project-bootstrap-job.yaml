@@ -1,0 +1,116 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: harbor-project-bootstrap
+  namespace: harbor
+spec:
+  backoffLimit: 6
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: bootstrap
+        image: curlimages/curl:8.17.0
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: HARBOR_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: harbor-values
+              key: HARBOR_ADMIN_PASSWORD
+        command:
+        - /bin/sh
+        - -ec
+        - |
+          harbor_url="http://harbor"
+
+          until curl -fsS "${harbor_url}/api/v2.0/health" >/dev/null; do
+            sleep 5
+          done
+
+          api() {
+            method="${1}"
+            path="${2}"
+            data="${3:-}"
+            expected="${4:-200}"
+
+            if [ -n "${data}" ]; then
+              status=$(curl -sS -o /tmp/harbor-bootstrap-response -w "%{http_code}" \
+                -u "admin:${HARBOR_ADMIN_PASSWORD}" \
+                -H "Content-Type: application/json" \
+                -X "${method}" \
+                -d "${data}" \
+                "${harbor_url}${path}")
+            else
+              status=$(curl -sS -o /tmp/harbor-bootstrap-response -w "%{http_code}" \
+                -u "admin:${HARBOR_ADMIN_PASSWORD}" \
+                -H "Content-Type: application/json" \
+                -X "${method}" \
+                "${harbor_url}${path}")
+            fi
+
+            case ",${expected}," in
+              *,"${status}",*) return 0 ;;
+            esac
+
+            cat /tmp/harbor-bootstrap-response
+            echo "Harbor API ${method} ${path} failed with HTTP ${status}, expected ${expected}"
+            return 1
+          }
+
+          ensure_project() {
+            project="${1}"
+            is_public="${2}"
+
+            if ! api HEAD "/api/v2.0/projects?project_name=${project}" "" "200"; then
+              api POST "/api/v2.0/projects" "{
+                \"project_name\": \"${project}\",
+                \"metadata\": {
+                  \"public\": \"${is_public}\",
+                  \"auto_scan\": \"true\",
+                  \"prevent_vul\": \"false\",
+                  \"severity\": \"critical\",
+                  \"reuse_sys_cve_allowlist\": \"true\"
+                }
+              }" "201,409"
+            fi
+
+            for metadata in \
+              "public=${is_public}" \
+              "auto_scan=true" \
+              "prevent_vul=false" \
+              "severity=critical" \
+              "reuse_sys_cve_allowlist=true"
+            do
+              key="${metadata%%=*}"
+              value="${metadata#*=}"
+              if ! api PUT "/api/v2.0/projects/${project}/metadatas/${key}" "{\"${key}\":\"${value}\"}" "200"; then
+                api POST "/api/v2.0/projects/${project}/metadatas/" "{\"${key}\":\"${value}\"}" "200,409"
+              fi
+            done
+
+            api POST "/api/v2.0/projects/${project}/members" "{
+              \"role_id\": 1,
+              \"member_group\": {
+                \"group_name\": \"devops\",
+                \"group_type\": 3
+              }
+            }" "201,409"
+          }
+
+          ensure_project public true
+          ensure_project private false
+
+          scan_schedule='{
+            "schedule": {
+              "type": "Daily",
+              "cron": "0 0 2 * * *"
+            },
+            "parameters": {
+              "scan_type": "vulnerability"
+            }
+          }'
+
+          if ! api PUT "/api/v2.0/system/scanAll/schedule" "${scan_schedule}" "200"; then
+            api POST "/api/v2.0/system/scanAll/schedule" "${scan_schedule}" "201,409"
+          fi
