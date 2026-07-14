@@ -1,0 +1,15 @@
+apiVersion: k8s.bitwarden.com/v1
+kind: BitwardenSecret
+metadata:
+  name: bitwarden-test
+  namespace: networking
+spec:
+  organizationId: a8b49694-f32e-42fa-beb3-b48700b86a42
+  secretName: bitwarden-test
+  authToken:
+    secretName: bw-prod-auth-token
+    secretKey: token
+  onlyMappedSecrets: true
+  map:
+  - bwSecretId: f413fdd0-fdcc-426c-aafe-b48700de768d
+    secretKeyName: hello

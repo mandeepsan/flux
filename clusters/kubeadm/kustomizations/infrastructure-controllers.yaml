@@ -19,6 +19,10 @@ spec:
     namespace: argocd
   - apiVersion: helm.toolkit.fluxcd.io/v2
     kind: HelmRelease
+    name: sm-operator
+    namespace: sm-operator-system
+  - apiVersion: helm.toolkit.fluxcd.io/v2
+    kind: HelmRelease
     name: cert-manager
     namespace: cert-manager
   - apiVersion: helm.toolkit.fluxcd.io/v2
