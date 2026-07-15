@@ -9,7 +9,7 @@ data:
       platform: 'forgejo',
       endpoint: 'https://git.otroid.net/api/v1/',
       repositories: ['mandeep/flux'],
-      baseBranches: ['main'],
+      baseBranchPatterns: ['main'],
       onboarding: false,
       requireConfig: 'ignored',
       dependencyDashboard: true,
@@ -21,6 +21,9 @@ data:
       timezone: 'Asia/Kolkata',
       prConcurrentLimit: 0,
       branchConcurrentLimit: 0,
+      flux: {
+        managerFilePatterns: ['/\\.ya?ml$/']
+      },
       ignorePaths: [
         '**/*.secret.yaml',
         '**/*-secret.yaml',
