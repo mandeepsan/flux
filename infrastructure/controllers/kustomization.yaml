@@ -9,5 +9,6 @@ resources:
 - local-path-provisioner
 - networking
 - pomerium
+- renovate
 - reloader
 - seaweedfs

@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: renovate-config
+  namespace: renovate
+data:
+  config.js: |
+    module.exports = {
+      platform: 'forgejo',
+      endpoint: 'https://git.otroid.net/api/v1/',
+      repositories: ['mandeep/flux'],
+      baseBranches: ['main'],
+      onboarding: false,
+      requireConfig: 'ignored',
+      dependencyDashboard: true,
+      enabledManagers: ['flux'],
+      gitAuthor: 'otroid-bot <otroid-bot@local.local>',
+      labels: ['dependencies', 'helm', 'renovate'],
+      automerge: false,
+      minimumReleaseAge: '24 hours',
+      timezone: 'Asia/Kolkata',
+      prConcurrentLimit: 0,
+      branchConcurrentLimit: 0,
+      ignorePaths: [
+        '**/*.secret.yaml',
+        '**/*-secret.yaml',
+        '**/*secrets.yaml',
+        '**/*secret.yaml',
+        'clusters/kubeadm/flux-system/**'
+      ]
+    };

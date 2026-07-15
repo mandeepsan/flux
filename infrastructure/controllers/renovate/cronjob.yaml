@@ -1,0 +1,40 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: renovate
+  namespace: renovate
+spec:
+  schedule: "0 */12 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      ttlSecondsAfterFinished: 86400
+      template:
+        spec:
+          automountServiceAccountToken: false
+          restartPolicy: Never
+          containers:
+          - name: renovate
+            image: ghcr.io/renovatebot/renovate:43.263.8
+            imagePullPolicy: IfNotPresent
+            env:
+            - name: LOG_LEVEL
+              value: info
+            - name: RENOVATE_CONFIG_FILE
+              value: /config/config.js
+            - name: RENOVATE_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: renovate-forgejo-token
+                  key: RENOVATE_TOKEN
+            volumeMounts:
+            - name: config
+              mountPath: /config
+              readOnly: true
+          volumes:
+          - name: config
+            configMap:
+              name: renovate-config
