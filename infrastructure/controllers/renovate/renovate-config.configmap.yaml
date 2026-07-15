@@ -20,6 +20,7 @@ data:
       minimumReleaseAge: '24 hours',
       timezone: 'Asia/Kolkata',
       prConcurrentLimit: 0,
+      prHourlyLimit: 0,
       branchConcurrentLimit: 0,
       flux: {
         managerFilePatterns: ['/\\.ya?ml$/']
