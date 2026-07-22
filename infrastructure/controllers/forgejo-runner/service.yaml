@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: netcup-k8s-dind-01
+  namespace: forgejo-runner
+spec:
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: forgejo-runner
+    app.kubernetes.io/instance: netcup-k8s-dind-01

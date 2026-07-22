@@ -30,6 +30,10 @@ spec:
     name: cilium
     namespace: kube-system
   - apiVersion: apps/v1
+    kind: StatefulSet
+    name: netcup-k8s-dind-01
+    namespace: forgejo-runner
+  - apiVersion: apps/v1
     kind: Deployment
     name: local-path-provisioner
     namespace: local-path-storage

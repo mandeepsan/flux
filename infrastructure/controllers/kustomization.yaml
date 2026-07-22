@@ -5,6 +5,7 @@ resources:
 - bitwarden
 - cert-manager
 - cilium
+- forgejo-runner
 - harbor
 - local-path-provisioner
 - networking

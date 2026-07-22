@@ -1,0 +1,126 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: netcup-k8s-dind-01
+  namespace: forgejo-runner
+spec:
+  serviceName: netcup-k8s-dind-01
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: forgejo-runner
+      app.kubernetes.io/instance: netcup-k8s-dind-01
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: forgejo-runner
+        app.kubernetes.io/instance: netcup-k8s-dind-01
+    spec:
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 60
+      initContainers:
+      - name: prepare-runner-data
+        image: docker.io/library/busybox:1.37.0
+        command:
+        - /bin/sh
+        - -ec
+        - |
+          mkdir -p /data/cache /data/workspace /data/host-workspace
+          chown -R 1000:1000 /data
+        volumeMounts:
+        - name: runner-data
+          mountPath: /data
+      containers:
+      - name: runner
+        image: data.forgejo.org/forgejo/runner:12.13.1
+        imagePullPolicy: IfNotPresent
+        command:
+        - forgejo-runner
+        - daemon
+        - --config
+        - /config/runner-config.yml
+        env:
+        - name: DOCKER_HOST
+          value: tcp://127.0.0.1:2375
+        resources:
+          requests:
+            cpu: 250m
+            memory: 512Mi
+          limits:
+            cpu: 500m
+            memory: 1Gi
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          runAsGroup: 1000
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - name: runner-data
+          mountPath: /data
+        - name: runner-config
+          mountPath: /config
+          readOnly: true
+      - name: dind
+        image: docker.io/library/docker:28.3.2-dind
+        imagePullPolicy: IfNotPresent
+        command:
+        - dockerd
+        - -H
+        - tcp://0.0.0.0:2375
+        - --tls=false
+        - --storage-driver=overlay2
+        env:
+        - name: DOCKER_TLS_CERTDIR
+          value: ""
+        ports:
+        - name: docker
+          containerPort: 2375
+        resources:
+          requests:
+            cpu: "2"
+            memory: 4Gi
+          limits:
+            cpu: "6"
+            memory: 12Gi
+        securityContext:
+          privileged: true
+          allowPrivilegeEscalation: true
+        startupProbe:
+          tcpSocket:
+            port: docker
+          periodSeconds: 5
+          failureThreshold: 30
+        readinessProbe:
+          tcpSocket:
+            port: docker
+          periodSeconds: 10
+          failureThreshold: 3
+        volumeMounts:
+        - name: docker-data
+          mountPath: /var/lib/docker
+      volumes:
+      - name: runner-config
+        secret:
+          secretName: forgejo-runner-config
+  volumeClaimTemplates:
+  - metadata:
+      name: runner-data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      storageClassName: local-path
+      resources:
+        requests:
+          storage: 20Gi
+  - metadata:
+      name: docker-data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      storageClassName: local-path
+      resources:
+        requests:
+          storage: 100Gi
