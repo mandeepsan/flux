@@ -104,6 +104,7 @@ spec:
 
           ensure_project public true
           ensure_project private false
+          ensure_project kairos false
 
           scan_schedule='{
             "schedule": {
